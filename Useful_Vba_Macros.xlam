@@ -1,0 +1,191 @@
+'------------------------------------------------------------------------------------------------------------------------------------------------------------
+Public Sub SheetClean(ByVal SheetName As String)
+
+'This subroutine is intended to clean up a worksheet by performing the following operations
+'1) Unmerging all cells
+'2) Remove Wrap Text
+'3) Standardize font syle, color, and size
+'4) Center-Center all cells
+
+    Dim ws As Worksheet
+    
+    Set ws = ActiveWorkbook.Worksheets(SheetName)
+    
+    '1) Unmerge all cells
+    ws.Cells.UnMerge
+    
+    '2) Remove Wrap Text
+    ws.Cells.WrapText = False
+    
+    '3) Standardize font syle, color, and size
+    ws.Cells.Font.Color = vbBlack
+    ws.Cells.Font.Size = 10
+    ws.Cells.Font.Name = "Arial"
+    ws.Cells.Font.Bold = False
+    ws.Cells.Font.Italic = False
+    ws.Cells.Interior.Color = xlNone
+    
+    '4) Center-Center all cells
+    ws.Cells.HorizontalAlignment = xlHAlignCenter
+    ws.Cells.VerticalAlignment = xlVAlignCenter
+
+   
+End Sub
+
+'------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+'This function is intended to find the last column in the worksheet and return the value as a long variable
+'If the sheet is empty, then 0 will be returned as the value
+
+Public Function LastColValue(ByVal SheetName As String) As Long
+
+    Dim ws As Worksheet
+    Dim lastCol As Long
+    
+    Set ws = ActiveWorkbook.Worksheets(SheetName)
+ 
+    If Application.WorksheetFunction.CountA(ws.Cells) <> 0 Then
+    
+        With ws
+            lastCol = .Cells.Find( _
+                                What:="*", _
+                                After:=.Range("A1"), _
+                                LookIn:=xlFormulas, _
+                                LookAt:=xlPart, _
+                                SearchOrder:=xlByColumns, _
+                                SearchDirection:=xlPrevious, _
+                                MatchCase:=False).Column
+                                           
+        End With
+    
+    Else
+        
+        lastCol = 0
+        
+    End If
+    
+    LastColValue = lastCol
+
+End Function
+
+'------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+'This function is intended to find the last row in the worksheet and return the value as a long variable
+'If the sheet is empty, then 0 will be returned as the value
+
+Public Function LastRowValue(ByVal SheetName As String) As Long
+
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    
+    Set ws = ActiveWorkbook.Worksheets(SheetName)
+ 
+    If Application.WorksheetFunction.CountA(ws.Cells) <> 0 Then
+    
+        With ws
+            lastRow = .Cells.Find( _
+                                What:="*", _
+                                After:=.Range("A1"), _
+                                LookIn:=xlFormulas, _
+                                LookAt:=xlPart, _
+                                SearchOrder:=xlByRows, _
+                                SearchDirection:=xlPrevious, _
+                                MatchCase:=False).Row
+                                           
+        End With
+    
+    Else
+        
+        lastRow = 0
+        
+    End If
+    
+    LastRowValue = lastRow
+
+End Function
+
+'------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Public Sub RemoveEmptyRows(ByVal SheetName As String, rowRange As Long)
+'This subroutine deletes all empty rows in a sheet between a certain range.
+    
+    Dim ws As Worksheet
+    
+    Set ws = ActiveWorkbook.Worksheets(SheetName)
+        
+    Dim i As Long
+        
+        i = 1
+    
+    Do While i < rowRange
+        
+        If Application.WorksheetFunction.CountA(ws.Rows(i).EntireRow) = 0 Then
+            ws.Rows(i).EntireRow.Delete
+            'reduce row range by 1 since deleting previous row
+            rowRange = rowRange - 1
+            'check new row to see if its also blank -- accounts for multiple blank rows
+            i = i - 1
+        End If
+         
+        i = i + 1
+         
+    Loop
+
+End Sub
+
+'------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Public Sub RemoveEmptyColumns(ByVal SheetName As String, colRange As Long)
+'This subroutine deletes all columns in a sheet within a specific range
+
+    Dim ws As Worksheet
+    
+    Set ws = ActiveWorkbook.Worksheets(SheetName)
+        
+    Dim i As Long
+        
+        i = 1
+    
+    Do While i < colRange
+        
+        If Application.WorksheetFunction.CountA(ws.Columns(i).EntireColumn) = 0 Then
+            ws.Columns(i).EntireColumn.Delete
+            'reduce last column value by 1 since deleting earlier col
+            colRange = colRange - 1
+            'recheck 'new' i column to see if it is also empty -- this is for multiple blanks in a row
+            i = i - 1
+        End If
+         
+        i = i + 1
+         
+    Loop
+
+End Sub
+
+'------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Public Sub SingleRowCombine(ByVal SheetName As String, idCol As Long, rowRange As Long, colRange As Long, Optional clearValues As Boolean = False)
+'This subroutine is used combine multiple rows associated with an identifier (idCol) into a single row
+'E.g. A sheet has merged cells, when cells are unmerged, they content of the cells spans multiple rows;
+'this subroutine will "remerge" the contents into a single cell / single row.
+
+    Dim ws As Worksheet
+    
+    Set ws = ActiveWorkbook.Worksheets(SheetName)
+    
+    Dim lastIDRow As Long
+    
+    
+    
+    
+    If clearValues = True Then
+    'clear values in cleaned up row
+    
+    'ws.Rows(i).ClearContents
+    
+    End If
+    
+
+End Sub
+
+'------------------------------------------------------------------------------------------------------------------------------------------------------------
