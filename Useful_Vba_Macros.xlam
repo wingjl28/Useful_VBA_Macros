@@ -170,22 +170,44 @@ Public Sub SingleRowCombine(ByVal SheetName As String, idCol As Long, rowRange A
 'this subroutine will "remerge" the contents into a single cell / single row.
 
     Dim ws As Worksheet
-    
     Set ws = ActiveWorkbook.Worksheets(SheetName)
+       
+    Dim currentID, lastID As String
+    Dim startRow, currentRow, lastIDRow, lastRow, startColumn, currentColumn, lastColumn As Long
     
-    Dim lastIDRow As Long
-    
-    
-    
-    
-    If clearValues = True Then
-    'clear values in cleaned up row
-    
-    'ws.Rows(i).ClearContents
-    
-    End If
-    
+        startColumn = 1 'starting from beginning
+        lastColumn = colRange 'user input for last column
+        
+        startRow = 1
+        lastRow = rowRange
 
+    For currentRow = startRow To lastRow
+    
+        currentID = ws.Cells(currentRow, idCol).Value
+        
+        If (currentRow = startRow) Then
+            lastIDRow = startRow
+            lastID = ws.Cells(startRow, idCol).Value
+        Else
+            If IsEmpty(currentID) Or StrComp(currentID, lastID, 1) = 0 Then
+                For currentColumn = startColumn To lastColumn
+                    If Not IsEmpty(ws.Cells(currentRow, currentColumn).Value) Then
+                        ws.Cells(lastIDRow, currentColumn).Value = ws.Cells(lastIDRow, currentColumn) & Chr(10) & ws.Cells(currentRow, currentColumn)
+                    End If
+                Next currentColumn
+                
+                If clearValues = True Then
+                'clear values in cleaned up row
+                    ws.Rows(currentRow).ClearContents
+                End If
+            Else
+                lastIDRow = currentRow
+                lastID = ws.Cells(lastIDRow, idCol).Value
+                
+
+            End If
+        End If
+    Next currentRow
 End Sub
 
 '------------------------------------------------------------------------------------------------------------------------------------------------------------
