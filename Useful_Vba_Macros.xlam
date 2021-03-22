@@ -189,3 +189,29 @@ Public Sub SingleRowCombine(ByVal SheetName As String, idCol As Long, rowRange A
 End Sub
 
 '------------------------------------------------------------------------------------------------------------------------------------------------------------
+Public Sub CombineBlock(ByVal area As Range, ByVal place As Range, Optional colSep As String = " / ")
+
+Dim cell As Range
+Dim currentRow As Integer
+Dim rowSep As String
+
+
+currentRow = area.Item(1, 1).Row
+
+For Each cell In area
+If Not IsEmpty(cell.Value) Then
+    If IsEmpty(place.Value) Then
+        place.Value = place.Value & cell.Value
+    ElseIf cell.Row = currentRow Then
+        place.Value = place.Value & colSep & cell.Value
+    Else
+        place.Value = place.Value & Chr(10) & cell.Value
+        currentRow = cell.Row
+    End If
+End If
+Next cell
+
+
+End Sub
+
+'------------------------------------------------------------------------------------------------------------------------------------------------------------
