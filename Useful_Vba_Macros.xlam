@@ -6,6 +6,7 @@ Public Sub SheetClean(ByVal SheetName As String)
 '2) Remove Wrap Text
 '3) Standardize font syle, color, and size
 '4) Center-Center all cells
+'5) Remove Hyperlinks
 
     Dim ws As Worksheet
     
@@ -28,7 +29,9 @@ Public Sub SheetClean(ByVal SheetName As String)
     '4) Center-Center all cells
     ws.Cells.HorizontalAlignment = xlHAlignCenter
     ws.Cells.VerticalAlignment = xlVAlignCenter
-
+    
+   '5) Remove Hyperlinks
+    ws.Cells.Hyperlinks.Delete
    
 End Sub
 
