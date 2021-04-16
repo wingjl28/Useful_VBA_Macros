@@ -1,0 +1,128 @@
+Sub protocolTracker()
+
+
+Dim inventorySheet, testSheet, protocolSheet As Worksheet
+'ASSUMPTION: Sheet names are constant. Replace to match your workbook values
+    Set testSheet = ActiveWorkbook.Worksheets("testtraces")
+    Set inventorySheet = ActiveWorkbook.Worksheets("inventorydata")
+    Set protocolSheet = ActiveWorkbook.Worksheets("All Req to Test Trace")
+Dim findRow, filePlaceCol, lastRow As Integer
+
+lastRow = LastRowValue(testSheet.Name)
+
+'for each test (row) in test sheet, look for 1) PDF for TPD/STCD 2) objective evidence folder
+
+Dim testID, objectiveEvidence, dataSheet As String
+'what column we are going to place the found results (i.e. datasheet name and (if applicable) name of objective evidence folder
+filePlaceCol = 4 'column D. Can change to suit needs
+
+
+Dim Loc As Range 'where are we going to search? Loc should be a Sheet.CellRange
+Dim firstLocRow As Integer 'keep track of the first location we find so as to avoid looping forever
+Dim spaceValue As String
+'THE FOLLOWING LOOP IS TO FIND ALL THE TESTS IN INVENTORY ------------------------------------------------------
+
+'loop through each test (or whatever) to see if its found in Loc area.
+For findRow = 2 To lastRow
+
+    testID = testSheet.Cells(findRow, 2).Value 'ASSUMPTION: looking for value in column 2 (TPD), this can be changed based off of what is looked for.
+    spaceValue = ""
+    'check to see if stc doc not tpd.
+    'ASSUMPTION: column 2 assumes "STCD" is placed for TPD ID if there is no TPD ID (i.e. its a STCD)
+    If StrComp(testID, "STCD") = 0 Then
+        testID = testSheet.Cells(findRow, 1).Value 'STCD IDs are in column 1 (TDD/STCD ID) not column 2.
+    End If
+
+    'define where we are looking
+    Set Loc = inventorySheet.Cells.Find(What:=testID) 'testID is what we are looking to find.
+    If Not Loc Is Nothing Then 'if we find something (Loc is NOT Nothing = Loc is "something"
+    firstLocRow = Loc.Row 'track first found location.
+
+        Do 'this is what we do for the first, and all other found values.
+        testSheet.Cells(findRow, filePlaceCol).Value = testSheet.Cells(findRow, filePlaceCol).Value & spaceValue & Loc.Value
+
+
+            Set Loc = inventorySheet.Cells.FindNext(Loc) 'look for the next value
+            spaceValue = Chr(10)
+        Loop Until Loc Is Nothing Or firstLocRow = Loc.Row 'if nothing found OR we just find 1 instance OR we loop through multiple instances and go back to the first value found
+    End If
+
+    'reset some values
+    Set Loc = Nothing
+    firstLocRow = 0
+    filePlaceCol = 4
+
+Next findRow 'do it again
+
+'END OF FIND ALL THE TESTS IN INVENTORY LOOP------------------------------------------------------
+
+For findRow = 2 To lastRow
+
+    testID = testSheet.Cells(findRow, 1).Value 'ASSUMPTION: looking for value in column 1 (TDD this time), this can be changed based off of what is looked for.
+    filePlaceCol = 9
+    spaceValue = ""
+    'define where we are looking
+    Set Loc = protocolSheet.Range("F:F").Find(What:=testID) 'testID is what we are looking to find.
+    If Not Loc Is Nothing Then 'if we find something (Loc is NOT Nothing = Loc is "something"
+    firstLocRow = Loc.Row 'track first found location.
+
+        Do 'this is what we do for the first, and all other found values.
+
+            protocolSheet.Cells(Loc.Row, filePlaceCol).Value = protocolSheet.Cells(Loc.Row, filePlaceCol).Value & spaceValue & testSheet.Cells(findRow, 4).Value
+            Set Loc = protocolSheet.Range("F:F").FindNext(Loc) 'look for the next value NOTE: using just range F column as there are multiple columns in the same row with the same value and if it finds the 2nd value in the row it will end
+            spaceValue = ""
+        Loop Until Loc Is Nothing Or firstLocRow = Loc.Row 'if nothing found OR we just find 1 instance OR we loop through multiple instances and go back to the first value found
+    End If
+
+    'reset some values
+    Set Loc = Nothing
+    firstLocRow = 0
+
+
+Next findRow 'do it again
+
+
+End Sub
+
+'------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+'This function is intended to find the last row in the worksheet and return the value as a long variable
+'If the sheet is empty, then 0 will be returned as the value
+
+Public Function LastRowValue(ByVal SheetName As String) As Long
+
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    
+    Set ws = ActiveWorkbook.Worksheets(SheetName)
+ 
+    If Application.WorksheetFunction.CountA(ws.Cells) <> 0 Then
+    
+        With ws
+            lastRow = .Cells.Find( _
+                                What:="*", _
+                                After:=.Range("A1"), _
+                                LookIn:=xlFormulas, _
+                                LookAt:=xlPart, _
+                                SearchOrder:=xlByRows, _
+                                SearchDirection:=xlPrevious, _
+                                MatchCase:=False).Row
+                                           
+        End With
+    
+    Else
+        
+        lastRow = 0
+        
+    End If
+    
+    LastRowValue = lastRow
+
+End Function
+
+
+
+
+
+
+
